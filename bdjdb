@@ -1,0 +1,120 @@
+
+import info.gridworld.grid.Grid;
+import info.gridworld.grid.BoundedGrid;
+import info.gridworld.grid.Location;
+import info.gridworld.world.World;
+
+public class MoneyWorld extends World<String>
+{
+	/** Message for help area */
+	private static final String HELP_MSG 
+		= "Click on grid cell to pick-up money; STEP to reset world";
+	private static final String[] NUMBERS = {"5", "10", "20", "50"};
+	private static final int NUM_CASES = 3;
+
+
+	/** grid to cleanup */
+	private Grid<String> grid;
+	private int sum;
+
+	/**
+	 * Create a world of letters of size rows x cols
+	 * @param rows number of rows in world
+	 * @param cols number of cols in world
+	 */
+	public MoneyWorld(int rows, int cols) 
+	{
+		super(new BoundedGrid<String>(rows, cols));
+		grid = getGrid();
+		fillWorld();
+		setMessage(HELP_MSG);
+		sum = 0;
+	}
+	
+	/**
+	 *  Refill world when the step button is pressed
+	 */
+	@Override
+	public void step()
+	{
+		sum = 0;
+		setMessage("Total Amount Picked Up: " + "$ " + sum + "\n" + HELP_MSG);
+		fillWorld(0, 0);
+	}
+	
+	
+	/**
+	 * Suppresses menu from appearing when any Location is clicked
+	 * @param loc the grid location that the user selected
+	 * @return true to indicate click was processed
+	 */
+	@Override
+	public boolean locationClicked(Location loc)
+	{
+		int total = pickupMoney(loc);
+		sum += total;
+		setMessage("Total Amount Picked Up: " + "$ " + sum + "\n" + HELP_MSG);
+		return true;
+	}
+	
+	private void fillWorld(int x, int y)
+	{
+		int maxRow = getGrid.getNumRows() - 1;
+		int maxCol = getGrid.getNumCols() - 1;
+		String frontSign = "";
+		String displayString = "";
+
+		if((x != maxRow && y != maxCol) || (x == maxRow && y != maxCol))
+			fillWorld(x, y + 1);
+		if(x != maxRow && y == maxCol)
+			fillWorld(x + 1, 0);
+
+
+		if(Math.random() < 0.5)
+			frontSign = "+";
+		else
+			frontSign = "-";
+
+		if(Math.random() < 0.5)
+		{
+			displayString = frontSign;
+		}
+		else
+		{
+			int randomIdx = (int)(Math.random() * (NUMBERS.length - 1))
+			displayString = NUMBERS[randomIdx];
+		}
+
+		getGrid.put(new Location(x, y), displayString);
+	}
+	
+	private int pickupMoney(Location loc, Deque<Location> removeStack)
+	{
+		if(!removeStack.isEmpty())
+		{
+			Scanner scan = new Scanner(getGrid.get(removeStack.pop()));
+			Scanner tempScan = new Scanner(getGrid().get(loc));
+
+			if(scan.hasNextInt() || tempScan.hasNextInt())
+			{
+				int currentNum;
+				if(!scan.hasNextInt())
+					currentNum = 0;
+				else
+					currentNum = scan.nextInt();
+
+				getGrid().put(loc, "*");
+				pickupMoney(removeStack.poll());
+			}
+		}
+	}
+	
+	/** 
+	 * Run the money world
+	 */	
+	public static void main(String[] args)
+	{
+		MoneyWorld myWorld = new MoneyWorld(10, 10);
+		myWorld.show();
+	}
+}
